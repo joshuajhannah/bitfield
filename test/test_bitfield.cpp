@@ -10,7 +10,8 @@ static_assert(sizeof(BUI8Normal) == 1, "[[no_unique_address]] not optimising as 
 
 TEST(BITFIELD, TestUInt8Constructor)
 {
-    BUI8Normal bits{71};
+    BUI8Normal bits;
+    bits._underlying = 71;
 
     EXPECT_EQ(bits.foo, 7);
     EXPECT_EQ(bits.bar, 1);
@@ -50,7 +51,8 @@ struct BUI8Overlap : public BitField<uint8_t>
 
 TEST(BITFIELD, TestUInt8OverlapConstruct)
 {
-    BUI8Overlap bits{157};
+    BUI8Overlap bits;
+    bits._underlying = 157;
 
     EXPECT_EQ(bits.foo, 29);
     EXPECT_EQ(bits.bar, 39);
@@ -81,7 +83,8 @@ struct BUI8Many : public BitField<uint8_t>
 
 TEST(BITFIELD, TestUInt8ManyConstruct)
 {
-    BUI8Many bits{157};
+    BUI8Many bits;
+    bits._underlying = 157;
 
     EXPECT_EQ(bits.field1, 1);
     EXPECT_EQ(bits.field2, 0);
@@ -117,8 +120,8 @@ static_assert(sizeof(BUI8Normal) == 1, "[[no_unique_address]] not optimising as 
 
 TEST(BITFIELD, TestUInt64Constructor)
 {
-    uint64_t underlying = (71ULL << 48) + 678934ULL;
-    BUI64Normal bits{underlying};
+    BUI64Normal bits;
+    bits._underlying = (71ULL << 48) + 678934ULL;
 
     EXPECT_EQ(bits.foo, 678934);
     EXPECT_EQ(bits.bar, 71);
@@ -158,8 +161,8 @@ struct BUI64Overlap : public BitField<uint64_t>
 
 TEST(BITFIELD, TestUInt64OverlapConstruct)
 {
-    uint64_t underlying = 2555933;
-    BUI64Overlap bits{underlying};
+    BUI64Overlap bits;
+    bits._underlying = 2555933;
 
     EXPECT_EQ(bits.foo, 2555933);
     EXPECT_EQ(bits.bar, 39);
@@ -208,7 +211,8 @@ struct BUI64Many : public BitField<uint64_t>
 
 TEST(BITFIELD, TestUInt64ManyConstruct)
 {
-    BUI64Many bits{12297829382473034410ULL};
+    BUI64Many bits;
+    bits._underlying = 12297829382473034410ULL;
 
     EXPECT_EQ(bits.field1, 0);
     EXPECT_EQ(bits.field2, 1);
@@ -254,4 +258,51 @@ TEST(BITFIELD, TestUInt64ManyAssign)
     bits.field64 = 1;
 
     EXPECT_EQ(static_cast<uint64_t>(bits), 17293822569102704797ULL);
+}
+
+struct foo {
+    struct : public BitField<uint16_t> {
+        Field<0, 9> field1;
+        Field<9, 7> field2;
+    } __attribute__((packed));
+    struct : public BitField<uint16_t> {
+        Field<0, 9> field3;
+        Field<9, 7> field4;
+    } __attribute__((packed));
+    struct : public BitField<uint16_t> {
+        Field<0, 9> field5;
+        Field<9, 7> field6;
+    } __attribute__((packed));
+    struct : public BitField<uint16_t> {
+        Field<0, 9> field7;
+        Field<9, 7> field8;
+    } __attribute__((packed));
+} __attribute__((packed));
+static_assert(sizeof(foo) == 8);
+
+TEST(BITFIELD, TestNestedFields)
+{
+    foo bits{};
+    bits.field1 = 10;
+    bits.field2 = 11;
+    bits.field3 = 12;
+    bits.field4 = 13;
+    bits.field5 = 14;
+    bits.field6 = 15;
+    bits.field7 = 16;
+    bits.field8 = 17;
+
+    uint64_t expected = 10 + (11ULL << 9) + (12ULL << 16) + (13ULL << 25) + (14ULL << 32) + (15ULL << 41) + (16ULL << 48) + (17ULL << 57);
+    uint64_t val;
+    std::memcpy(&val, &bits, sizeof(bits));
+    
+    EXPECT_EQ(val, expected);
+    EXPECT_EQ(static_cast<uint16_t>(bits.field1), 10);
+    EXPECT_EQ(static_cast<uint16_t>(bits.field2), 11);
+    EXPECT_EQ(static_cast<uint16_t>(bits.field3), 12);
+    EXPECT_EQ(static_cast<uint16_t>(bits.field4), 13);
+    EXPECT_EQ(static_cast<uint16_t>(bits.field5), 14);
+    EXPECT_EQ(static_cast<uint16_t>(bits.field6), 15);
+    EXPECT_EQ(static_cast<uint16_t>(bits.field7), 16);
+    EXPECT_EQ(static_cast<uint16_t>(bits.field8), 17);
 }
