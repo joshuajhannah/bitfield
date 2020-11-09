@@ -1,4 +1,4 @@
-# Bitfield
+# bitfield
 A tiny header file for representing bitfields.
 
 # Documentation
