@@ -18,10 +18,6 @@ From here, we declare the bitfield members in our type using the following type 
     
 We wouldn't need this filthy macro if we could tag a type with this attribute instead. Alas..
 
-# Caveats
-- This optimisation we rely on is not guaranteed by the standard, so this code could break on a standard-compliant compiler.
-- You won't be able to represent the same bit region with two different members, as they will have the same type and thus won't be optimised to sit at the same address.
-
 # Examples
 ## Single underlying
 Here's a simple example representing a hardware register with a single underlying element.
@@ -63,3 +59,7 @@ We can even nest multiple bitfields
     } __attribute__((packed));
     
     static_assert(sizeof(foo) == 8);
+
+# Caveats
+- This optimisation we rely on is not guaranteed by the standard, so this code could break on a standard-compliant compiler.
+- You won't be able to represent the same bit region with two different members, as they will have the same type and thus won't be optimised to sit at the same address.
