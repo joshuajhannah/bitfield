@@ -1,5 +1,5 @@
 # bitfield
-A tiny header file for representing bitfields.
+A tiny header file for representing bitfields in C++20.
 
 # Documentation
 Types that wish to be represented as bitfields should inherit from the `BitField` type, declared as
