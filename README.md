@@ -15,8 +15,6 @@ From here, we declare the bitfield members in our type using the following type 
     class _Field;
     
     #define Field [[no_unique_address]] _Field
-    
-We wouldn't need this filthy macro if we could tag a type with this attribute instead. Alas..
 
 # Examples
 ## Single underlying
